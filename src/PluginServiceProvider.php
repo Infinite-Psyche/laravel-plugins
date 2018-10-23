@@ -1,5 +1,5 @@
 <?php
-namespace Oneso\LaravelPlugins;
+namespace Franktrue\LaravelPlugins;
 
 use Illuminate\Support\ServiceProvider;
 

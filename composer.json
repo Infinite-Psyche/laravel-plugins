@@ -1,20 +1,22 @@
 {
-  "name": "oneso/laravel-plugins",
+  "name": "franktrue/laravel-plugins",
   "description": "A Laravel and Lumen plugin system",
   "license": "MIT",
   "authors": [
     {
-      "name": "Marcel Görtz",
-      "email": "goertz.marcel@gmail.com"
+      "name": "Franktrue",
+      "email": "fnf_1993@163.com"
     }
   ],
   "minimum-stability": "stable",
   "require": {
-    "php": ">=5.5.9"
+    "php": ">=5.5.9",
+    "illuminate/contracts": "^5.3",
+    "illuminate/support": "^5.3"
   },
   "autoload": {
     "psr-4": {
-      "Oneso\\LaravelPlugins\\": "src/"
+      "Franktrue\\LaravelPlugins\\": "src/"
     }
   }
 }
