@@ -18,5 +18,12 @@
     "psr-4": {
       "Franktrue\\LaravelPlugins\\": "src/"
     }
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "Franktrue\\LaravelPlugins\\PluginServiceProvider"
+      ]
+    }
   }
 }
