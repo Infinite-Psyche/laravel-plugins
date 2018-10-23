@@ -3,26 +3,32 @@ namespace Franktrue\LaravelPlugins;
 
 use Illuminate\Contracts\Foundation\Application;
 
+/**
+ * 插件抽象类
+ *
+ * Class Plugin
+ * @package Franktrue\LaravelPlugins
+ */
 abstract class Plugin
 {
     protected $app;
 
     /**
-     * The Plugin Name.
+     * 插件名称 The Plugin Name.
      *
      * @var string
      */
     public $name;
 
     /**
-     * A description of the plugin.
+     * 插件描述 A description of the plugin.
      * 
      * @var string
      */
     public $description;
 
     /**
-     * The version of the plugin.
+     * 插件版本 The version of the plugin.
      * 
      * @var string
      */
@@ -48,7 +54,7 @@ abstract class Plugin
     abstract public function boot();
 
     /**
-     * Check for empty plugin name.
+     * 检查插件名称是否为空 Check for empty plugin name.
      *
      * @throws \InvalidArgumentException
      */
@@ -60,6 +66,8 @@ abstract class Plugin
     }
 
     /**
+     * 以插件类名称为基础返回以驼峰大小写格式的视图命名空间，并在末尾删除插件。
+     *
      * Returns the view namespace in a camel case format based off
      * the plugins class name, with plugin stripped off the end.
      * 
@@ -79,7 +87,7 @@ abstract class Plugin
     }
 
     /**
-     * Add a view namespace for this plugin.
+     * 为此插件添加视图命名空间。Add a view namespace for this plugin.
      * Eg: view("plugin:articles::{view_name}")
      *
      * @param string $path
@@ -88,12 +96,12 @@ abstract class Plugin
     {
         $this->app['view']->addNamespace(
             $this->getViewNamespace(),
-            $this->getPluginPath() . DIRECTORY_SEPARATOR . $path
+            $this->getPluginPath(). DIRECTORY_SEPARATOR . 'resources' . DIRECTORY_SEPARATOR . $path
         );
     }
 
     /**
-     * Enable routes for this plugin.
+     * 启用此插件的路由。 Enable routes for this plugin.
      *
      * @param string $path
      */
@@ -105,7 +113,7 @@ abstract class Plugin
     }
 
     /**
-     * Register a database migration path for this plugin.
+     * 注册此插件的数据库迁移路径。Register a database migration path for this plugin.
      *
      * @param  array|string  $paths
      * @return void
@@ -114,12 +122,14 @@ abstract class Plugin
     {
         $this->app->afterResolving('migrator', function ($migrator) use ($paths) {
             foreach ((array) $paths as $path) {
-                $migrator->path($this->getPluginPath() . DIRECTORY_SEPARATOR . $path);
+                $migrator->path($this->getPluginPath(). DIRECTORY_SEPARATOR . 'database' . DIRECTORY_SEPARATOR . $path);
             }
         });
     }
 
     /**
+     * 获取插件路径 Get the plugin path
+     *
      * @return string
      */
     public function getPluginPath()
@@ -130,7 +140,24 @@ abstract class Plugin
         return dirname($fileName);
     }
 
+
     /**
+     * 初始化插件配置信息
+     * 如何读取配置信息：config('plugin_XXX'),XXX=$this->name
+     *
+     * @param string $path
+     */
+    protected function setupConfig($path = 'config.php')
+    {
+        $path = $this->getPluginPath(). DIRECTORY_SEPARATOR . $path;
+        $key = 'plugin_'.$this->name;
+        $config = $this->app['config']->get($key, []);
+        $this->app['config']->set($key, array_merge(require $path, $config));
+    }
+    
+    /**
+     * 获取插件控制器命名空间
+     *
      * @return string
      */
     protected function getPluginControllerNamespace()
@@ -154,7 +181,7 @@ abstract class Plugin
     }
 
     /**
-     * Returns a plugin view
+     * 返回一个插件视图 Returns a plugin view
      *
      * @param $view
      * @return \Illuminate\View\View

@@ -1,6 +1,8 @@
 <?php
 namespace Franktrue\LaravelPlugins;
 
+use Franktrue\LaravelPlugins\Exceptions\InvalidClassException;
+use Franktrue\LaravelPlugins\Exceptions\InvalidPluginNameException;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Finder\SplFileInfo;
 
@@ -80,18 +82,17 @@ class PluginManager
             $pluginClass = $this->getPluginClassNameFromDirectory($directoryName);
 
             if (!class_exists($pluginClass)) {
-                dd('Plugin ' . $directoryName . ' needs a ' . $directoryName . 'Plugin class.');
+                throw new InvalidClassException('Plugin ' . $directoryName . ' needs a ' . $directoryName . 'Plugin class.');
             }
 
             try {
                 $plugin = $this->app->makeWith($pluginClass, [$this->app]);
             } catch (\ReflectionException $e) {
-                dd('Plugin ' . $directoryName . ' could not be booted: "' . $e->getMessage() . '"');
-                exit;
+                throw new \ReflectionException('Plugin ' . $directoryName . ' could not be booted: "' . $e->getMessage() . '"');
             }
 
             if (!($plugin instanceof Plugin)) {
-                dd('Plugin ' . $directoryName . ' must extends the Plugin Base Class');
+                throw new InvalidPluginNameException('Plugin ' . $directoryName . ' must extends the Plugin Base Class');
             }
 
             $plugin->boot();
