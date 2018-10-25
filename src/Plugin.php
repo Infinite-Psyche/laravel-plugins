@@ -87,17 +87,18 @@ abstract class Plugin
     }
 
     /**
-     * 为此插件添加视图命名空间。Add a view namespace for this plugin.
-     * Eg: view("plugin:articles::{view_name}")
+     * 启用此插件配置信息
      *
-     * @param string $path
+     * @param  string  $path
+     * @param  string  $key
+     * @return void
      */
-    protected function enableViews($path = 'views')
+    protected function enableConfig($path = 'config.php', $key='')
     {
-        $this->app['view']->addNamespace(
-            $this->getViewNamespace(),
-            $this->getPluginPath(). DIRECTORY_SEPARATOR . 'resources' . DIRECTORY_SEPARATOR . $path
-        );
+        $path = $this->getPluginPath(). DIRECTORY_SEPARATOR . $path;
+        if(empty($key)) $key = 'plugin_'.$this->name;
+        $config = $this->app['config']->get($key, []);
+        $this->app['config']->set($key, array_merge(require $path, $config));
     }
 
     /**
@@ -110,6 +111,20 @@ abstract class Plugin
         $this->app->router->group(['namespace' => $this->getPluginControllerNamespace()], function ($app) use ($path) {
             require $this->getPluginPath() . DIRECTORY_SEPARATOR . $path;
         });
+    }
+
+    /**
+     * 为此插件添加视图命名空间。Add a view namespace for this plugin.
+     * Eg: view("plugin:articles::{view_name}")
+     *
+     * @param string $path
+     */
+    protected function enableViews($path = 'views')
+    {
+        $this->app['view']->addNamespace(
+            $this->getViewNamespace(),
+            $this->getPluginPath(). DIRECTORY_SEPARATOR . 'resources' . DIRECTORY_SEPARATOR . $path
+        );
     }
 
     /**
@@ -138,21 +153,6 @@ abstract class Plugin
         $fileName  = $reflector->getFileName();
 
         return dirname($fileName);
-    }
-
-
-    /**
-     * 初始化插件配置信息
-     * 如何读取配置信息：config('plugin_XXX'),XXX=$this->name
-     *
-     * @param string $path
-     */
-    protected function setupConfig($path = 'config.php')
-    {
-        $path = $this->getPluginPath(). DIRECTORY_SEPARATOR . $path;
-        $key = 'plugin_'.$this->name;
-        $config = $this->app['config']->get($key, []);
-        $this->app['config']->set($key, array_merge(require $path, $config));
     }
     
     /**

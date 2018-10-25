@@ -28,7 +28,6 @@ class ClassLoader
     {
         if (isset($this->pluginManager->getClassMap()[$class])) {
             \Composer\Autoload\includeFile($this->pluginManager->getClassMap()[$class]);
-
             return true;
         }
     }

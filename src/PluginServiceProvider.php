@@ -10,7 +10,17 @@ class PluginServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        PluginManager::getInstance($this->app);
+        PluginManager::getInstance($this->app, config('plugins'));
+    }
+
+    /**
+     * Setup the config.
+     */
+    protected function setupConfig()
+    {
+        $source = realpath(__DIR__.'/config.php');
+        $this->publishes([$source => config_path('plugins.php')], 'laravel-plugins');
+        $this->mergeConfigFrom($source, 'plugins');
     }
 
     /**
@@ -20,8 +30,10 @@ class PluginServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->app->bind('laravel-plugins', function ($app) {
-            return PluginManager::getInstance($app);
+        $this->setupConfig();
+
+        $this->app->singleton(PluginManager::class, function ($app) {
+            return PluginManager::getInstance($app, config('plugins'));
         });
     }
 }

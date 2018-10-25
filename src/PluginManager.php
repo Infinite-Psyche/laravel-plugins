@@ -30,26 +30,41 @@ class PluginManager
      */
     protected $classMap = [];
 
-    /**
-     * @var PluginExtender
+    /*
+     * @var
      */
-    protected $pluginExtender;
+    public $config = [];
 
     /**
      * PluginManager constructor.
      *
      * @param $app
+     * @param array $config
      */
-    public function __construct($app)
+    public function __construct($app, array $config = [])
     {
-        $this->app             = $app;
-        $this->pluginDirectory = $app->path() . DIRECTORY_SEPARATOR . 'Plugins';
-        $this->pluginExtender  = new PluginExtender($this, $app);
+        $this->app = $app;
+
+        $this->configure($config);
+
+        $this->pluginDirectory = $config['folder'];
 
         $this->bootPlugins();
-        $this->pluginExtender->extendAll();
 
         $this->registerClassLoader();
+    }
+
+    /**
+     * Overrides configuration settings
+     *
+     * @param array $config
+     *
+     * @return self
+     */
+    public function configure(array $config = [])
+    {
+        $this->config = array_replace($this->config, $config);
+        return $this;
     }
 
     /**
@@ -62,14 +77,14 @@ class PluginManager
 
     /**
      * @param $app
+     * @param array $config
      * @return PluginManager
      */
-    public static function getInstance($app)
+    public static function getInstance($app, array $config = [])
     {
         if (is_null(self::$instance)) {
-            self::$instance = new self($app);
+            self::$instance = new self($app, $config);
         }
-
         return self::$instance;
     }
 
@@ -107,7 +122,7 @@ class PluginManager
      */
     protected function getPluginClassNameFromDirectory($directory)
     {
-        return "App\\Plugins\\${directory}\\${directory}Plugin";
+        return $this->config['namespace']."\\${directory}\\${directory}Plugin";
     }
 
     /**
@@ -127,15 +142,6 @@ class PluginManager
         $this->classMap = $classMap;
 
         return $this;
-    }
-
-    /**
-     * @param $classNamespace
-     * @param $storagePath
-     */
-    public function addClassMapping($classNamespace, $storagePath)
-    {
-        $this->classMap[$classNamespace] = $storagePath;
     }
 
     /**
